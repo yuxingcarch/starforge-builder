@@ -1,8 +1,32 @@
-# Welcome to your Lovable project
+
+# StarForge Builder
+
+A modern, interactive building placement game inspired by real-time strategy games like StarCraft.
+
+## Features
+
+- Grid-based building placement system
+- Multiple building types with different sizes
+- Intuitive drag and place mechanics
+- Clean, minimalist UI with subtle animations
+- Responsive design that works on various screen sizes
 
 ## Project info
 
 **URL**: https://lovable.dev/projects/43550d0f-feb7-4efc-8b47-6a35e4769440
+
+## How to Use
+
+1. Select a building from the bottom panel
+2. Click on the grid to place it
+3. Right-click to cancel building placement
+
+## Technologies Used
+
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui components
 
 ## How can I edit this code?
 
@@ -35,35 +59,3 @@ npm i
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/43550d0f-feb7-4efc-8b47-6a35e4769440) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
