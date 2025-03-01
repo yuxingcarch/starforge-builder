@@ -8,9 +8,30 @@ type BuildingType = "Barracks" | "SupplyDepot" | "CommandCenter";
 
 // Building data with colors and dimensions
 const BUILDINGS = {
-  Barracks: { color: "#f43f5e", width: 4, height: 4 },
-  SupplyDepot: { color: "#10b981", width: 3, height: 3 },
-  CommandCenter: { color: "#3b82f6", width: 6, height: 6 },
+  Barracks: { 
+    color: "#f43f5e", 
+    width: 4, 
+    height: 4,
+    gradient: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)",
+    topColor: "#fb7185",
+    sideColor: "#e11d48"
+  },
+  SupplyDepot: { 
+    color: "#10b981", 
+    width: 3, 
+    height: 3,
+    gradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    topColor: "#34d399",
+    sideColor: "#059669"
+  },
+  CommandCenter: { 
+    color: "#3b82f6", 
+    width: 6, 
+    height: 6,
+    gradient: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+    topColor: "#60a5fa",
+    sideColor: "#2563eb"
+  },
 };
 
 // Placed building interface
@@ -79,6 +100,84 @@ const Index = () => {
     }
   };
 
+  // Render a building block with 3D-like appearance
+  const renderBuildingBlock = (building: PlacedBuilding | null, isPreview = false) => {
+    if (!building && !selectedBuilding) return null;
+    
+    const type = building ? building.type : selectedBuilding as BuildingType;
+    const buildingData = BUILDINGS[type];
+    const x = building ? building.x : mousePosition.x;
+    const y = building ? building.y : mousePosition.y;
+    
+    const width = buildingData.width * 25;
+    const height = buildingData.height * 25;
+    const depth = Math.min(width, height) * 0.2; // Depth effect
+    
+    return (
+      <div
+        className={`absolute transition-all duration-150 ${isPreview ? 'opacity-70 pointer-events-none' : 'animate-fade-in'}`}
+        style={{
+          left: `${x}px`,
+          top: `${y}px`,
+          width: `${width}px`,
+          height: `${height}px`,
+          transform: `perspective(500px) translateZ(0px)`,
+        }}
+      >
+        {/* Top face */}
+        <div 
+          className="absolute w-full h-full rounded-sm"
+          style={{
+            backgroundColor: buildingData.topColor,
+            backgroundImage: buildingData.gradient,
+            boxShadow: isPreview ? 'none' : '0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
+            border: '2px solid rgba(255,255,255,0.1)',
+            top: 0,
+            left: 0,
+            zIndex: 1,
+          }}
+        >
+          {/* Building name on top (only for placed buildings) */}
+          {!isPreview && (
+            <div className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold text-shadow opacity-75">
+              {type}
+            </div>
+          )}
+        </div>
+        
+        {/* Right side face - creates 3D effect */}
+        <div
+          className="absolute rounded-sm"
+          style={{
+            backgroundColor: buildingData.sideColor,
+            width: `${depth}px`,
+            height: `${height}px`,
+            top: `0px`,
+            left: `${width}px`,
+            transform: 'rotateY(90deg)',
+            transformOrigin: 'left',
+            opacity: isPreview ? 0.5 : 0.8,
+          }}
+        />
+        
+        {/* Bottom side face - creates 3D effect */}
+        <div
+          className="absolute rounded-sm"
+          style={{
+            backgroundColor: buildingData.sideColor,
+            width: `${width}px`,
+            height: `${depth}px`,
+            top: `${height}px`,
+            left: `0px`,
+            transform: 'rotateX(90deg)',
+            transformOrigin: 'top',
+            opacity: isPreview ? 0.5 : 0.8,
+          }}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <header className="p-4 border-b border-gray-700 bg-black/30 backdrop-blur-sm">
@@ -98,38 +197,10 @@ const Index = () => {
           }}
         >
           {/* Render placed buildings */}
-          {placedBuildings.map((building) => (
-            <div
-              key={building.id}
-              className="absolute transition-all duration-300 animate-fade-in"
-              style={{
-                left: `${building.x}px`,
-                top: `${building.y}px`,
-                width: `${BUILDINGS[building.type].width * 25}px`,
-                height: `${BUILDINGS[building.type].height * 25}px`,
-                backgroundColor: BUILDINGS[building.type].color,
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                border: '2px solid rgba(255,255,255,0.1)',
-                borderRadius: '4px',
-              }}
-            />
-          ))}
+          {placedBuildings.map((building) => renderBuildingBlock(building))}
           
           {/* Show building preview while placing */}
-          {isPlacing && selectedBuilding && (
-            <div
-              className="absolute transition-all duration-150 opacity-70 pointer-events-none"
-              style={{
-                left: `${mousePosition.x}px`,
-                top: `${mousePosition.y}px`,
-                width: `${BUILDINGS[selectedBuilding].width * 25}px`,
-                height: `${BUILDINGS[selectedBuilding].height * 25}px`,
-                backgroundColor: BUILDINGS[selectedBuilding].color,
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.5)',
-                borderRadius: '4px',
-              }}
-            />
-          )}
+          {isPlacing && selectedBuilding && renderBuildingBlock(null, true)}
         </div>
         
         {/* Building selection panel */}
@@ -141,7 +212,9 @@ const Index = () => {
                 selectedBuilding === building ? 'ring-2 ring-white' : ''
               }`}
               style={{
-                backgroundColor: BUILDINGS[building].color,
+                background: BUILDINGS[building].gradient,
+                boxShadow: '0 6px 15px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
+                border: '2px solid rgba(255, 255, 255, 0.1)',
                 opacity: 0.9,
               }}
               onClick={() => selectBuilding(building)}
