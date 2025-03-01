@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { MenuIcon, ArrowRightIcon } from "lucide-react";
+import { MenuIcon, ArrowRightIcon, HelpCircleIcon, XIcon } from "lucide-react";
 import { FactorySpace } from "@/components/FactorySpace";
 
 // Building types
@@ -61,6 +61,7 @@ const Index = () => {
   const [isPlacing, setIsPlacing] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isFactoryOpen, setIsFactoryOpen] = useState(false);
+  const [showHelp, setShowHelp] = useState(true);
   
   const gridRef = useRef<HTMLDivElement>(null);
   
@@ -212,6 +213,7 @@ const Index = () => {
           size="icon"
           onClick={() => setIsFactoryOpen(!isFactoryOpen)}
           className="text-white"
+          aria-label={isFactoryOpen ? "Close factory" : "Open factory"}
         >
           {isFactoryOpen ? <ArrowRightIcon size={20} /> : <MenuIcon size={20} />}
         </Button>
@@ -268,16 +270,42 @@ const Index = () => {
         ))}
       </div>
       
-      {/* Instructions */}
-      <div className="absolute top-4 right-4 max-w-xs bg-black/80 backdrop-blur-sm border border-gray-700 p-4 rounded-md shadow-lg">
-        <h2 className="font-medium mb-2">Controls</h2>
-        <ul className="text-sm text-gray-300 space-y-1">
-          <li>• Click a building from the bottom panel</li>
-          <li>• Click on the grid to place it</li>
-          <li>• Right-click to cancel placement</li>
-          <li>• Use the factory to create custom buildings</li>
-        </ul>
+      {/* Help button and help panel */}
+      <div className="absolute top-4 right-20 flex gap-2">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => setShowHelp(!showHelp)}
+          className="text-white bg-black/50 backdrop-blur-sm rounded-full"
+          aria-label="Toggle help"
+        >
+          <HelpCircleIcon size={20} />
+        </Button>
       </div>
+      
+      {/* Instructions panel with close button */}
+      {showHelp && (
+        <div className="absolute top-16 right-4 max-w-xs bg-black/80 backdrop-blur-sm border border-gray-700 p-4 rounded-md shadow-lg animate-fade-in">
+          <div className="flex justify-between items-start mb-2">
+            <h2 className="font-medium">Controls</h2>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setShowHelp(false)}
+              className="text-gray-400 hover:text-white -mt-1 -mr-1"
+              aria-label="Close help"
+            >
+              <XIcon size={18} />
+            </Button>
+          </div>
+          <ul className="text-sm text-gray-300 space-y-1">
+            <li>• Click a building from the bottom panel</li>
+            <li>• Click on the grid to place it</li>
+            <li>• Right-click to cancel placement</li>
+            <li>• Use the factory to create custom buildings</li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
