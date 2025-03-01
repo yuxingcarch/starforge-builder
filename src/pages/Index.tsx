@@ -2,12 +2,24 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { MenuIcon, ArrowRightIcon } from "lucide-react";
+import { FactorySpace } from "@/components/FactorySpace";
 
 // Building types
-type BuildingType = "Barracks" | "SupplyDepot" | "CommandCenter";
+type BuildingType = "Barracks" | "SupplyDepot" | "CommandCenter" | string;
 
 // Building data with colors and dimensions
-const BUILDINGS = {
+interface BuildingData {
+  color: string;
+  width: number;
+  height: number;
+  gradient: string;
+  topColor: string;
+  sideColor: string;
+}
+
+// Dictionary of building data
+const defaultBuildings: Record<BuildingType, BuildingData> = {
   Barracks: { 
     color: "#f43f5e", 
     width: 4, 
@@ -43,10 +55,12 @@ interface PlacedBuilding {
 }
 
 const Index = () => {
+  const [buildings, setBuildings] = useState<Record<BuildingType, BuildingData>>(defaultBuildings);
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingType | null>(null);
   const [placedBuildings, setPlacedBuildings] = useState<PlacedBuilding[]>([]);
   const [isPlacing, setIsPlacing] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isFactoryOpen, setIsFactoryOpen] = useState(false);
   
   const gridRef = useRef<HTMLDivElement>(null);
   
@@ -100,12 +114,23 @@ const Index = () => {
     }
   };
 
+  // Add a new custom building
+  const addCustomBuilding = (name: string, data: BuildingData) => {
+    setBuildings(prev => ({
+      ...prev,
+      [name]: data
+    }));
+  };
+
   // Render a building block with 3D-like appearance
   const renderBuildingBlock = (building: PlacedBuilding | null, isPreview = false) => {
     if (!building && !selectedBuilding) return null;
     
     const type = building ? building.type : selectedBuilding as BuildingType;
-    const buildingData = BUILDINGS[type];
+    const buildingData = buildings[type];
+    
+    if (!buildingData) return null;
+    
     const x = building ? building.x : mousePosition.x;
     const y = building ? building.y : mousePosition.y;
     
@@ -180,11 +205,19 @@ const Index = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
-      <header className="p-4 border-b border-gray-700 bg-black/30 backdrop-blur-sm">
+      <header className="p-4 border-b border-gray-700 bg-black/30 backdrop-blur-sm flex justify-between items-center">
         <h1 className="text-2xl font-medium tracking-tight">StarForge Builder</h1>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => setIsFactoryOpen(!isFactoryOpen)}
+          className="text-white"
+        >
+          {isFactoryOpen ? <ArrowRightIcon size={20} /> : <MenuIcon size={20} />}
+        </Button>
       </header>
       
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex">
         {/* Grid for placing buildings */}
         <div 
           ref={gridRef}
@@ -203,29 +236,37 @@ const Index = () => {
           {isPlacing && selectedBuilding && renderBuildingBlock(null, true)}
         </div>
         
-        {/* Building selection panel */}
-        <div className="h-32 bg-gray-800 border-t border-gray-700 p-4 flex justify-center items-center space-x-6">
-          {(Object.keys(BUILDINGS) as BuildingType[]).map((building) => (
-            <Card 
-              key={building}
-              className={`w-24 h-24 flex flex-col items-center justify-center transition-all cursor-pointer hover:scale-105 ${
-                selectedBuilding === building ? 'ring-2 ring-white' : ''
-              }`}
-              style={{
-                background: BUILDINGS[building].gradient,
-                boxShadow: '0 6px 15px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
-                border: '2px solid rgba(255, 255, 255, 0.1)',
-                opacity: 0.9,
-              }}
-              onClick={() => selectBuilding(building)}
-            >
-              <div className="text-white text-xs font-medium mt-2">
-                {building}
-              </div>
-            </Card>
-          ))}
-        </div>
+        {/* Factory space panel */}
+        {isFactoryOpen && (
+          <div className="w-80 bg-gray-800 border-l border-gray-700 p-4 overflow-y-auto animate-slide-in-right">
+            <FactorySpace 
+              buildings={buildings}
+              addCustomBuilding={addCustomBuilding}
+            />
+          </div>
+        )}
       </main>
+      
+      {/* Building selection panel */}
+      <div className="h-32 bg-gray-800 border-t border-gray-700 p-4 flex justify-center items-center space-x-6 overflow-x-auto">
+        {Object.entries(buildings).map(([type, data]) => (
+          <Card 
+            key={type}
+            className="building-card w-24 h-24 flex flex-col items-center justify-center transition-all cursor-pointer hover:scale-105"
+            style={{
+              background: data.gradient,
+              boxShadow: '0 6px 15px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
+              border: '2px solid rgba(255, 255, 255, 0.1)',
+              opacity: 0.9,
+            }}
+            onClick={() => selectBuilding(type)}
+          >
+            <div className="text-white text-xs font-medium mt-2">
+              {type}
+            </div>
+          </Card>
+        ))}
+      </div>
       
       {/* Instructions */}
       <div className="absolute top-4 right-4 max-w-xs bg-black/80 backdrop-blur-sm border border-gray-700 p-4 rounded-md shadow-lg">
@@ -234,6 +275,7 @@ const Index = () => {
           <li>• Click a building from the bottom panel</li>
           <li>• Click on the grid to place it</li>
           <li>• Right-click to cancel placement</li>
+          <li>• Use the factory to create custom buildings</li>
         </ul>
       </div>
     </div>
