@@ -250,7 +250,7 @@ const Index = () => {
       </main>
       
       {/* Building selection panel */}
-      <div className="h-32 bg-gray-800 border-t border-gray-700 p-4 flex justify-center items-center space-x-6 overflow-x-auto">
+      <div className={`h-32 bg-gray-800 border-t border-gray-700 p-4 flex justify-center items-center space-x-6 ${isFactoryOpen ? 'pr-80' : ''} overflow-x-auto`}>
         {Object.entries(buildings).map(([type, data]) => (
           <Card 
             key={type}
